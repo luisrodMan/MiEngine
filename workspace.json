@@ -1,0 +1,29 @@
+{
+    "class": "com.nxtr.spengine.core.MainContainer",
+    "left": {
+        "class": "com.nxtr.spengine.core.MainContainer",
+        "center": {
+            "class": "com.nxtr.spengine.core.ViewContainer",
+            "data": {
+                "views": [
+                    {
+                        "class": "com.nxtr.spengine.FirstView"
+                    }
+                ]
+            }
+        }
+    },
+	"center": {
+        "class": "com.nxtr.spengine.core.MainContainer",
+        "center": {
+            "class": "com.nxtr.spengine.core.ViewContainer",
+            "data": {
+                "views": [
+                    {
+                        "class": "com.nxtr.spengine.FirstView"
+                    }
+                ]
+            }
+        }
+    }
+}
