@@ -1,0 +1,19 @@
+{
+    "version": "1.0",
+    "activeWorkspace": "C:/Users/luis/Desktop/game/sapito",
+    "recents": [
+        "C:/Users/luis/Desktop/game/sapito"
+    ],
+    "configuration": [
+        {
+            "name": "interface",
+            "component": "clazz.xd.cd",
+            "props": {
+                "font": "",
+                "theme": ""
+            },
+            "children": [
+            ]
+        }
+    ]
+}

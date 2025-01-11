@@ -7,9 +7,8 @@ public class InspectorView extends ViewAdapter {
 
 	private InspectorComponent component = new InspectorComponent();
 
-	@Override
-	public String getTitle() {
-		return "Inspector";
+	public InspectorView() {
+		super("Inspector");
 	}
 
 	@Override

@@ -9,15 +9,12 @@ public class Scene2DView extends ViewAdapter {
 	private Canvas2D component = new Canvas2D();
 
 	public Scene2DView() {
+		this(null);
 	}
 
 	public Scene2DView(SceneHolder scene) {
+		super(scene == null ? "null xd" : scene.getScene().getName());
 		this.sceneHolder = scene;
-	}
-
-	@Override
-	public String getTitle() {
-		return sceneHolder.getScene().getName();
 	}
 
 	@Override
