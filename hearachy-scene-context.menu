@@ -1,0 +1,49 @@
+{
+    "items": [
+        {
+            "text": "New Empty Object",
+            "action": "newGameObject"
+        },
+        {
+            "text": "New Rectangle",
+            "action": "newRectangle"
+        },
+        {
+            "text": "New Scene",
+            "action": "newScene"
+        },
+        {
+            "text": "Duplicate",
+            "action": "duplicate"
+        },
+        {
+            "text": "Rename",
+            "action": "rename"
+        },
+        {
+            "text": "Delete",
+            "action": "delete"
+        },
+        {
+            "text": "New Panel",
+            "action": "newPanel"
+        },
+        {
+            "text": "New Text",
+            "action": "newText"
+        },
+        {
+            "text": "New Button",
+            "action": "newButton"
+        },
+		{
+            "text": "Block",
+            "action": "blockObject"
+        },
+        {
+            "text": "Set As Selection Root",
+            "action": "setAsSelectionRoot"
+        }
+        
+    ]
+}

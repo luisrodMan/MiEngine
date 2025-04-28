@@ -1,0 +1,28 @@
+{
+    "items": [
+        {
+            "text": "New Folder",
+            "action": "newFolder"
+        },
+        {
+            "text": "New Scene",
+            "action": "newScene"
+        },
+		{
+            "text": "Refresh",
+            "action": "refresh"
+        },
+        {
+            "text": "Rename",
+            "action": "rename"
+        },
+        {
+            "text": "Delete",
+            "action": "delete"
+        },
+        {
+            "text": "Set as main scene",
+            "action": "mainScene"
+        }
+    ]
+}

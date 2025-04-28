@@ -112,7 +112,7 @@
 			<artifactId>furthergui</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.nxtr</groupId>
 			<artifactId>easymng</artifactId>
@@ -123,6 +123,11 @@
 			<groupId>com.ngeneration</groupId>
 			<artifactId>miengine</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.2.6</version>
 		</dependency>
 	</dependencies>
 </project>
