@@ -42,7 +42,9 @@ public class GUITest {
 		var container = new FPanel((Layout) null);
 
 		FTextComponent textArea = new FTextComponent();
+		textArea.setName("area1");
 		FTextComponent textArea2 = new FTextComponent();
+		textArea2.setName("area2");
 		textArea.setText("6.- Iterate Continuing Project Ideas Levels and Fix Bugs On Demand!\r\n"
 				+ "7.- Once completed Run On Android!!!\r\n" + "8.- Integrate payments!\r\n" + "9.- Release!!!!\r\n"
 				+ "3.- Fix TextField Component\r\n" + "4.- Fix GUI Nasty Bugs\r\n" + "\r\n" + "######### FIXES\r\n"
@@ -173,20 +175,7 @@ public class GUITest {
 
 	public static void main(String[] args) {
 		//
-//		testGUI();
-		var list = new LinkedList<String>();
-		list.add("hola135434534");
-		list.add("hola2");
-
-		var lista2 = list.stream().filter(v -> {
-			System.out.println("listao size: " + list.size());
-			return v.length() > 10;
-		}).toList();
-
-		System.out.println("lista 1");
-		list.forEach(System.out::println);
-		System.out.println("lista 2");
-		lista2.forEach(System.out::println);
+		testGUI();
 	}
 
 	private static void testGUI() {

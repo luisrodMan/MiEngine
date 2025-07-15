@@ -24,7 +24,7 @@ import com.nxtr.easymng.hearachy.ItemsFlavor;
 import com.nxtr.spengine.project.EngineResourceItem;
 import com.nxtr.spengine.views.scene.GameObjectItem;
 
-public class ReferenceHandler extends PropertyHandlerByType {
+public class ReferenceHandler extends HandlerProviderByType {
 
 	public ReferenceHandler() {
 		super(new Class<?>[] { Component.class, ResourceItem.class, GameObject.class });
@@ -39,7 +39,7 @@ public class ReferenceHandler extends PropertyHandlerByType {
 	}
 
 	@Override
-	public PropertyHandler getHandler(Class<?> type,
+	public Handler getHandler(Class<?> type,
 			Map<? extends Class<? extends Annotation>, Annotation> annotations, Object initialValue) {
 		InputComponentInternal component = new InputComponentInternal();
 		component.setType(type);
@@ -47,7 +47,7 @@ public class ReferenceHandler extends PropertyHandlerByType {
 		return component;
 	}
 
-	private class InputComponentInternal implements PropertyHandler {
+	private class InputComponentInternal implements Handler {
 
 		private Class<?> type;
 		private ChangeListener changeListener;

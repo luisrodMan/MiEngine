@@ -1,10 +1,13 @@
 package com.nxtr.spengine.views.console;
 
+import java.awt.Font;
+
 import com.ngeneration.furthergui.FComponent;
 import com.ngeneration.furthergui.FPanel;
 import com.ngeneration.furthergui.FScrollPane;
 import com.ngeneration.furthergui.FTextPane;
 import com.ngeneration.furthergui.FurtherApp;
+import com.ngeneration.furthergui.graphics.FFont;
 import com.ngeneration.furthergui.layout.BorderLayout;
 import com.nxtr.easymng.ViewAdapter;
 
@@ -16,6 +19,7 @@ public class ConsoleView extends ViewAdapter {
 
 	public ConsoleView() {
 		super(ID, "Output");
+		text.setFont(new FFont(new Font("Consolas", Font.PLAIN, 16)));
 		container.add(new FScrollPane(text));
 	}
 

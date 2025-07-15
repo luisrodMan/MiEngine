@@ -13,6 +13,8 @@ import com.nxtr.spengine.MiEngine;
 import com.nxtr.spengine.views.inspector.object.GameObjectContent;
 import com.nxtr.spengine.views.inspector.resolver.ContentManager;
 import com.nxtr.spengine.views.inspector.resolver.ContentProvider;
+import com.nxtr.spengine.views.inspector.resolver.InspectorResourceResolver;
+import com.nxtr.spengine.views.inspector.resolver.InspectorTypeResolver;
 import com.nxtr.spengine.views.scene.GameObjectItem;
 
 public class InspectorView extends ViewAdapter {

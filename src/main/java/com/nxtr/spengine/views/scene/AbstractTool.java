@@ -20,6 +20,11 @@ public class AbstractTool implements Tool {
 	}
 
 	@Override
+	public void onDettached(ToolManager toolManager) {
+
+	}
+
+	@Override
 	public void mouseMoved(ToolManager toolManager) {
 
 	}
@@ -33,11 +38,6 @@ public class AbstractTool implements Tool {
 
 	@Override
 	public void paint(ToolManager mng, Graphics g) {
-
-	}
-
-	@Override
-	public void onDettached(ToolManager toolManager) {
 
 	}
 

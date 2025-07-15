@@ -20,6 +20,7 @@ import com.ngeneration.furthergui.graphics.Graphics;
 import com.ngeneration.furthergui.math.Point;
 import com.ngeneration.miengine.graphics.OrthographicCamera;
 import com.ngeneration.miengine.math.Vector3;
+import com.ngeneration.miengine.scene.Component;
 import com.ngeneration.miengine.scene.GameObject;
 import com.nxtr.easymng.hearachy.Item;
 import com.nxtr.easymng.hearachy.ItemsFlavor;
@@ -36,6 +37,8 @@ public class Canvas2D extends FPanel implements DragInterface {
 	private ToolManager mng;
 
 	private Map<String, DropHandler<EngineResourceItem, GameObject>> dropHandlers = new HashMap<>();
+	private boolean runLoop;
+	private Component selected;
 
 	public Canvas2D(Scene2DEditor view) {
 		this.view = view;
@@ -54,8 +57,23 @@ public class Canvas2D extends FPanel implements DragInterface {
 				if (selection.addAll(node) || (!selection.isEmpty() && node.isEmpty())) {
 					selection.clear();
 					selection.addAll(node);
+					if (selection.size() == 1 && selection.iterator().next() instanceof GameObjectItem item) {
+						boolean found = false;
+						for (Component c : item.getObject().getComponents()) {
+							if (c.getClass().getCanonicalName().equals("game.ParticleSystem")) {
+								selected = c;
+								loop();
+								found = true;
+							}
+						}
+						if (!found)
+							runLoop = false;
+					} else
+						runLoop = false;
 					fireEvent(view);
 				}
+				if (!runLoop)
+					selected = null;
 			}
 
 		};
@@ -72,6 +90,30 @@ public class Canvas2D extends FPanel implements DragInterface {
 			}
 		});
 		getInputMap(WHEN_IN_FOCUSED_WINDOWS).put(KeyStroke.getKeyStroke("C"), "centerSelection");
+	}
+
+	private void loop() {
+		if (runLoop)
+			return;
+		runLoop = true;
+		new Thread(() -> {
+
+			long lastTime = System.currentTimeMillis();
+			while (runLoop) {
+				long current = System.currentTimeMillis();
+				long delta = current - lastTime;
+				if (selected instanceof Component c) {
+					c.update(delta / 1000.0f);
+				}
+				repaintCanvas();
+				try {
+					Thread.sleep(1000 / 60);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				lastTime = current;
+			}
+		}).start();
 	}
 
 	public void setTool(Tool selectionTool) {
@@ -130,6 +172,7 @@ public class Canvas2D extends FPanel implements DragInterface {
 
 		var localOrigin = camera.getLocal(Vector3.ZERO);
 		g.setColor(Color.LIGTH_GRAY);
+		g.setPenSize(1);
 		g.drawRect((int) localOrigin.x, getHeight() - (int) localOrigin.y, (int) (viewportWidth * camera.scale.x),
 				(int) (-viewportHeight * camera.scale.x));
 

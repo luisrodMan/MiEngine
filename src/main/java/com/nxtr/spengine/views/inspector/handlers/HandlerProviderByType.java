@@ -3,11 +3,11 @@ package com.nxtr.spengine.views.inspector.handlers;
 import java.lang.annotation.Annotation;
 import java.util.Map;
 
-public abstract class PropertyHandlerByType implements PropertyHandlerProvider {
+public abstract class HandlerProviderByType implements HandlerProvider {
 
-	private Class<?>[] types;
+	protected Class<?>[] types;
 
-	public PropertyHandlerByType(Class<?>[] types) {
+	public HandlerProviderByType(Class<?>[] types) {
 		this.types = types;
 	}
 

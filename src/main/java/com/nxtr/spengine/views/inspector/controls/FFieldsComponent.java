@@ -14,14 +14,14 @@ import com.ngeneration.furthergui.math.Dimension;
 import com.ngeneration.furthergui.math.Padding;
 import com.nxtr.spengine.views.inspector.FieldDescriptor;
 import com.nxtr.spengine.views.inspector.handlers.FieldHandler;
-import com.nxtr.spengine.views.inspector.handlers.PropertyHandler;
+import com.nxtr.spengine.views.inspector.handlers.Handler;
 
 public class FFieldsComponent extends FPanel {
 
 	private Consumer<FieldHandler> listener;
-	private Map<String, PropertyHandler> fields;
+	private Map<String, Handler> fields;
 
-	public FFieldsComponent(Map<FieldDescriptor, PropertyHandler> map) {
+	public FFieldsComponent(Map<FieldDescriptor, Handler> map) {
 		GridBagLayout layout = new GridBagLayout(map.size() + 2, 2);
 		setPadding(new Padding(0, 0, 0, 5));
 		setLayout(layout);

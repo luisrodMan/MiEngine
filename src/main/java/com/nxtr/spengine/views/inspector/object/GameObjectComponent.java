@@ -1,5 +1,6 @@
 package com.nxtr.spengine.views.inspector.object;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -12,6 +13,7 @@ import com.ngeneration.furthergui.FButton;
 import com.ngeneration.furthergui.FComboBox;
 import com.ngeneration.furthergui.FComponent;
 import com.ngeneration.furthergui.FLabel;
+import com.ngeneration.furthergui.FMenu;
 import com.ngeneration.furthergui.FMenuItem;
 import com.ngeneration.furthergui.FOptionPane;
 import com.ngeneration.furthergui.FPanel;
@@ -41,16 +43,17 @@ import com.ngeneration.miengine.scene.physics.CircleCollider;
 import com.ngeneration.miengine.scene.physics.Collider;
 import com.nxtr.spengine.EngineUtil;
 import com.nxtr.spengine.MiEngine;
+import com.nxtr.spengine.dialogs.NewScriptDialog;
 import com.nxtr.spengine.project.ComponentWraper;
 import com.nxtr.spengine.project.MiEngineProject;
 import com.nxtr.spengine.views.inspector.FieldDescriptor;
 import com.nxtr.spengine.views.inspector.InspectableObjectParser;
 import com.nxtr.spengine.views.inspector.controls.FCollapsableComponent;
 import com.nxtr.spengine.views.inspector.controls.FFieldsComponent;
-import com.nxtr.spengine.views.inspector.handlers.AbstractPropertyHandler;
-import com.nxtr.spengine.views.inspector.handlers.BasicInputComponentProvider;
+import com.nxtr.spengine.views.inspector.handlers.AbstractHandler;
+import com.nxtr.spengine.views.inspector.handlers.BasicDataTypeProvider;
 import com.nxtr.spengine.views.inspector.handlers.FieldHandler;
-import com.nxtr.spengine.views.inspector.handlers.PropertyHandler;
+import com.nxtr.spengine.views.inspector.handlers.Handler;
 import com.nxtr.spengine.views.scene.GameObjectItem;
 
 public class GameObjectComponent extends FPanel {
@@ -118,12 +121,11 @@ public class GameObjectComponent extends FPanel {
 		nameContainer.setLayout(new GridBagLayout(2, 5));
 
 		FButton iconBtn = new FButton("Icon");
-		var enableDisableObject = new BasicInputComponentProvider().getHandler(boolean.class, null,
-				gameObject.isActive());
+		var enableDisableObject = new BasicDataTypeProvider().getHandler(boolean.class, null, gameObject.isActive());
 		enableDisableObject.setChangeListener(event -> {
 			consumer.accept(gameObject, new FieldHandler("active", enableDisableObject));
 		});
-		var nameField = new BasicInputComponentProvider().getHandler(String.class, null,
+		var nameField = new BasicDataTypeProvider().getHandler(String.class, null,
 				gameObject.getName() == null ? "" : gameObject.getName());
 		nameField.setChangeListener(event -> {
 			consumer.accept(gameObject, new FieldHandler("name", nameField));
@@ -207,7 +209,7 @@ public class GameObjectComponent extends FPanel {
 
 			FPanel titleContainer = new FPanel(new GridBagLayout(1, 3));
 			titleContainer.setBackground(Color.TRANSLUCENT);
-			var enableDisableComponent = new BasicInputComponentProvider().getHandler(boolean.class, null,
+			var enableDisableComponent = new BasicDataTypeProvider().getHandler(boolean.class, null,
 					component.isEnabled());
 			enableDisableComponent.setChangeListener(event -> {
 				consumer.accept(component, new FieldHandler("enabled", enableDisableComponent));
@@ -249,7 +251,7 @@ public class GameObjectComponent extends FPanel {
 			c.fillVertical = true;
 			titleContainer.add(optionsPanel, c);
 
-			LinkedHashMap<FieldDescriptor, PropertyHandler> map = null;
+			LinkedHashMap<FieldDescriptor, Handler> map = null;
 			component.gameObject = gameObject;
 			if (row[0] == 0) {
 				List<FieldDescriptor> data = new ArrayList<>(3);
@@ -262,8 +264,8 @@ public class GameObjectComponent extends FPanel {
 				map = InspectableObjectParser.parseObject(component);
 
 			if (isScript) {
-				var mm = new LinkedHashMap<FieldDescriptor, PropertyHandler>();
-				mm.put(new FieldDescriptor("Script", null, null, null), new AbstractPropertyHandler() {
+				var mm = new LinkedHashMap<FieldDescriptor, Handler>();
+				mm.put(new FieldDescriptor("Script", null, null, null), new AbstractHandler() {
 					private FComponent comp;
 
 					@Override
@@ -356,30 +358,92 @@ public class GameObjectComponent extends FPanel {
 		addBtn.addActionListener(event -> {
 			FPopupMenu menu = new FPopupMenu();
 			var complist = project.getComponents();
-			complist.addAll(defaultComponents);
-			complist.forEach(c -> {
-				menu.add(new FMenuItem(c.getName())).addActionListener(e -> {
-					var component = c.newInstance();
-					if (component != null) {
-						var rect = new Rectangle();
-						if (component instanceof Collider
-								&& gameObject.getComponent(Renderer.class) instanceof Renderer render) {
-							render.getLocalBounds(rect);
-							if (component instanceof BoxCollider box) {
-								box.dimension = rect.getSize();
-							} else if (component instanceof CircleCollider circle) {
-								circle.radius = Math.min(rect.width, rect.height) * 0.5f;
-							}
-						}
-						gameObjectItem.addComponent(component);
-					}
-				});
+			// sort
+			Map<String, List<ComponentWraper>> subFolders = new HashMap<>();
+			for (var i : complist) {
+				var path = i.getQualifiedName();
+				var subs = path.split("\\.");
+				if (subs.length == 2)
+					subFolders.computeIfAbsent("", k -> new LinkedList<>()).add(i);
+				else
+					subFolders.computeIfAbsent(subs[1], k -> new LinkedList<>()).add(i);
+			}
+
+			defaultComponents.forEach(c -> {
+				menu.add(createComponentMenuItem(c.getName(), c, gameObject));
 			});
+			var gameFolder = (FMenu) menu.add(new FMenu("game"));
+			for (var folder : subFolders.entrySet().stream().sorted((v1, v2) -> v1.getKey().compareTo(v2.getKey()))
+					.toList()) {
+				folder.getValue().sort((v1, v2) -> v1.getQualifiedName().compareTo(v2.getQualifiedName()));
+				var parent = folder.getKey().equals("") ? gameFolder
+						: (FMenu) gameFolder.add(new FMenu(folder.getKey()));
+				var replace = "game.";
+				folder.getValue().forEach(v -> {
+					var name = v.getQualifiedName();
+					name = name.substring(replace.length());
+					int idx = name.indexOf(".");
+					if (idx > 0)
+						name = name.substring(idx + 1);
+					parent.add(createComponentMenuItem(name, v, gameObject));
+				});
+			}
+			menu.add(new FMenuItem("New Component")).addActionListener(e -> {
+				// packages
+				var root = new File(project.getSourcesDirectory(), "game");
+				var rootPath = root.getAbsolutePath();
+				List<File> collector = new LinkedList<>();
+				collector.add(root);
+				collectDirectories(root, collector);
+				var packages = collector.stream()
+						.map(f -> f.getAbsolutePath().replace(rootPath, "game").replace("\\", "."))
+						.sorted((v1, v2) -> v1.compareTo(v2)).toList();
+				var dialog = new NewScriptDialog(packages);
+				dialog.setSelection("game");
+				if (dialog.setVisible() == FOptionPane.YES) {
+					// compile class
+					// assign to object
+					// open script on editor
+					var cannonicalName = dialog.getCannonicalName();
+					project.assignScript(gameObject, cannonicalName);
+					refresh();
+				}
+			});
+
 			menu.showVisible(addBtn, 0, addBtn.getHeight());
 		});
 		//
 
 		add(new FScrollPane(container));
+	}
+
+	private void collectDirectories(File file, List<File> collector) {
+		for (var f : file.listFiles())
+			if (f.isDirectory()) {
+				collector.add(f);
+				collectDirectories(f, collector);
+			}
+	}
+
+	private FMenuItem createComponentMenuItem(String name, ComponentWraper componentWrapper, GameObject gameObject) {
+		var item = new FMenuItem(name);
+		item.addActionListener(e -> {
+			var component = componentWrapper.newComponent();
+			if (component != null) {
+				var rect = new Rectangle();
+				if (component instanceof Collider
+						&& gameObject.getComponent(Renderer.class) instanceof Renderer render) {
+					render.getLocalBounds(rect);
+					if (component instanceof BoxCollider box) {
+						box.dimension = rect.getSize();
+					} else if (component instanceof CircleCollider circle) {
+						circle.radius = Math.min(rect.width, rect.height) * 0.5f;
+					}
+				}
+				gameObjectItem.addComponent(component);
+			}
+		});
+		return item;
 	}
 
 	private FComponent createSeparator() {

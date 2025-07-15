@@ -4,6 +4,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.ngeneration.furthergui.FOptionPane;
+import com.ngeneration.miengine.graphics.OrthographicCamera;
+import com.ngeneration.miengine.scene.Camera;
 import com.ngeneration.miengine.scene.GameObject;
 import com.nxtr.easymng.Application;
 import com.nxtr.easymng.Editor;
@@ -35,11 +37,17 @@ public class AssetsActions {
 
 	public void newSceneAction() {
 		Resource folder = getSingleSelectedFolder(getAssets());
-		var sceneResource = MiEngineDialogs.newScene(folder, new GameObject(), null);
+		var scene = new GameObject();
+		GameObject child = new GameObject("Main Camera");
+		Camera camera = new Camera();
+		camera.setCamera(new OrthographicCamera());
+		child.addComponent(camera);
+		scene.addChild(child);
+		var sceneResource = MiEngineDialogs.newScene(folder, scene, null);
 		if (sceneResource != null) {
 //			getAssets().expandAndSelect(null);
 			getAssets().getSelectionManager().setSelection(List.of(sceneResource));
-			
+
 		}
 	}
 

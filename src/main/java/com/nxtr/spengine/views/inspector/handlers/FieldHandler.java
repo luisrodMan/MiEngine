@@ -9,11 +9,11 @@ import lombok.Getter;
 
 public class FieldHandler {
 
-	private PropertyHandler handler;
+	private Handler handler;
 	@Getter
 	private String name;
 
-	public FieldHandler(String name, PropertyHandler handler) {
+	public FieldHandler(String name, Handler handler) {
 		this.name = name;
 		this.handler = handler;
 	}

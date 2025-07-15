@@ -5,7 +5,10 @@ import java.util.Collection;
 import java.util.List;
 
 import com.ngeneration.furthergui.FOptionPane;
+import com.ngeneration.miengine.graphics.OrthographicCamera;
 import com.ngeneration.miengine.math.Vector2;
+import com.ngeneration.miengine.scene.Camera;
+import com.ngeneration.miengine.scene.Component;
 import com.ngeneration.miengine.scene.GameObject;
 import com.ngeneration.miengine.scene.RectangleRenderer;
 import com.ngeneration.miengine.scene.ui.Button;
@@ -34,7 +37,8 @@ public class OutlineActions {
 
 	private GameObjectItem getSingleSelection() {
 		Scene2DEditor editor = ((Scene2DEditor) outlineView.getCurrentView());
-		return (GameObjectItem) editor.getSelectionManager().getSingleSelection();
+		var selected = (GameObjectItem) editor.getSelectionManager().getSingleSelection();
+		return selected != null ? selected : (GameObjectItem) editor.getRoot();
 	}
 
 	private Collection<GameObjectItem> getRootSelection() {
@@ -89,6 +93,15 @@ public class OutlineActions {
 		var parent = getSingleSelection();
 		GameObject child = new GameObject("Rectangle");
 		child.addComponent(new RectangleRenderer());
+		createChild(parent, child);
+	}
+
+	public void newCameraAction() {
+		var parent = getSingleSelection();
+		GameObject child = new GameObject("Main Camera");
+		Camera camera = new Camera();
+		camera.setCamera(new OrthographicCamera());
+		child.addComponent(camera);
 		createChild(parent, child);
 	}
 

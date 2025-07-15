@@ -1,10 +1,11 @@
-package com.nxtr.spengine.views.inspector;
+package com.nxtr.spengine.views.inspector.resolver;
 
 import java.util.function.Function;
 
 import com.ngeneration.furthergui.FComponent;
 import com.nxtr.easymng.workspace.Resource;
-import com.nxtr.spengine.views.inspector.resolver.ResourceContentProvider;
+import com.nxtr.spengine.views.inspector.AbstractInspectorContent;
+import com.nxtr.spengine.views.inspector.InspectorContent;
 
 public class InspectorResourceResolver extends ResourceContentProvider<FComponent, InspectorContent> {
 

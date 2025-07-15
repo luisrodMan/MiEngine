@@ -26,10 +26,10 @@ import com.ngeneration.miengine.graphics.Color;
 import com.ngeneration.miengine.util.EngineSerializer;
 import com.nxtr.spengine.views.inspector.controls.BasicInputsControl;
 
-public class BasicInputComponentProvider implements PropertyHandlerProvider {
+public class BasicDataTypeProvider implements HandlerProvider {
 
 	@Override
-	public PropertyHandler getHandler(Class<?> type,
+	public Handler getHandler(Class<?> type,
 			Map<? extends Class<? extends Annotation>, Annotation> annotations, Object initialValue) {
 		return new InternalComponent(type, initialValue);
 	}
@@ -44,7 +44,7 @@ public class BasicInputComponentProvider implements PropertyHandlerProvider {
 		return type.isPrimitive() || EngineSerializer.isBasicType(type);
 	}
 
-	private class InternalComponent implements PropertyHandler {
+	private class InternalComponent implements Handler {
 		private Object template;
 		private Field[] fields;
 		private Class<?> type;

@@ -358,7 +358,8 @@ public class MiEngine extends AbstractApplication {
 	}
 
 	public void openScript(String classPath, int line) {
-		openScriptFullpath(getProject().getDirectory() + "\\src\\main\\java\\" + classPath.replace(".", "\\") + ".java", line);
+		openScriptFullpath(getProject().getDirectory() + "\\src\\main\\java\\" + classPath.replace(".", "\\") + ".java",
+				line);
 	}
 
 	private void openScriptFullpath(String fullpath, int line) {
@@ -374,6 +375,36 @@ public class MiEngine extends AbstractApplication {
 		}
 	}
 
+	private String compilerDir = "C:\\eclipse\\plugins\\org.eclipse.justj.openjdk.hotspot.jre.full.win32.x86_64_21.0.5.v20241023-1957\\jre\\bin";
+
+	private String getClassPath() {
+		var prjPath = getProject().getDirectory().getAbsolutePath();
+		return "\"" + prjPath
+				+ "\\target\\classes;C:\\Users\\luisr\\git\\MiEngineLib\\target\\classes;C:\\Users\\luisr\\.m2\\repository\\org\\lwjgl\\lwjgl\\3.3.3\\lwjgl-3.3.3.jar;C:\\Users\\luisr\\.m2\\repository\\org\\lwjgl\\lwjgl-glfw\\3.3.3\\lwjgl-glfw-3.3.3.jar;C:\\Users\\luisr\\.m2\\repository\\org\\lwjgl\\lwjgl-nfd\\3.3.3\\lwjgl-nfd-3.3.3.jar;C:\\Users\\luisr\\.m2\\repository\\org\\lwjgl\\lwjgl-openal\\3.3.3\\lwjgl-openal-3.3.3.jar;C:\\Users\\luisr\\.m2\\repository\\org\\lwjgl\\lwjgl-opengl\\3.3.3\\lwjgl-opengl-3.3.3.jar;C:\\Users\\luisr\\.m2\\repository\\org\\lwjgl\\lwjgl-stb\\3.3.3\\lwjgl-stb-3.3.3.jar;C:\\Users\\luisr\\.m2\\repository\\org\\lwjgl\\lwjgl\\3.3.3\\lwjgl-3.3.3-natives-windows.jar;C:\\Users\\luisr\\.m2\\repository\\org\\lwjgl\\lwjgl-glfw\\3.3.3\\lwjgl-glfw-3.3.3-natives-windows.jar;C:\\Users\\luisr\\.m2\\repository\\org\\lwjgl\\lwjgl-nfd\\3.3.3\\lwjgl-nfd-3.3.3-natives-windows.jar;C:\\Users\\luisr\\.m2\\repository\\org\\lwjgl\\lwjgl-openal\\3.3.3\\lwjgl-openal-3.3.3-natives-windows.jar;C:\\Users\\luisr\\.m2\\repository\\org\\lwjgl\\lwjgl-opengl\\3.3.3\\lwjgl-opengl-3.3.3-natives-windows.jar;C:\\Users\\luisr\\.m2\\repository\\org\\lwjgl\\lwjgl-stb\\3.3.3\\lwjgl-stb-3.3.3-natives-windows.jar;C:\\Users\\luisr\\.m2\\repository\\com\\google\\code\\gson\\gson\\2.8.9\\gson-2.8.9.jar\"";
+	}
+
+	public void compileScript(String cannonicalName) {
+		var prjPath = getProject().getDirectory().getAbsolutePath();
+		var command = new String[6];
+		command[0] = compilerDir + "\\javac.exe";
+		command[1] = "-classpath";
+		command[2] = getClassPath();
+		command[3] = "-d";
+		command[4] = prjPath + "/target/classes";
+		command[5] = prjPath + "/src/main/java/" + cannonicalName.replace(".", "/") + ".java";
+		try {
+			var p =new ProcessBuilder().command(command).directory(new File(prjPath)).redirectErrorStream(true).start();
+			var bufferedReader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			String line = null;
+			while ((line = bufferedReader.readLine()) != null) {
+				System.out.println(line);
+			}
+		} catch (IOException e) {
+
+			e.printStackTrace();
+		}
+	}
+
 	private void executeScene(String sceneRelativePath) {
 
 		if (true) {
@@ -381,13 +412,12 @@ public class MiEngine extends AbstractApplication {
 		}
 		var prjPath = getProject().getDirectory().getAbsolutePath();
 		var command = new String[9];
-		command[0] = "C:\\eclipse\\plugins\\org.eclipse.justj.openjdk.hotspot.jre.full.win32.x86_64_21.0.5.v20241023-1957\\jre\\bin\\javaw.exe";
+		command[0] = compilerDir + "\\javaw.exe";
 		command[1] = "-Dfile.encoding=UTF-8";
 		command[2] = "-Dstdout.encoding=UTF-8";
 		command[3] = "-Dstderr.encoding=UTF-8";
 		command[4] = "-classpath";
-		command[5] = "\"" + prjPath
-				+ "\\target\\classes;C:\\Users\\luisr\\git\\MiEngineLib\\target\\classes;C:\\Users\\luisr\\.m2\\repository\\org\\lwjgl\\lwjgl\\3.3.3\\lwjgl-3.3.3.jar;C:\\Users\\luisr\\.m2\\repository\\org\\lwjgl\\lwjgl-glfw\\3.3.3\\lwjgl-glfw-3.3.3.jar;C:\\Users\\luisr\\.m2\\repository\\org\\lwjgl\\lwjgl-nfd\\3.3.3\\lwjgl-nfd-3.3.3.jar;C:\\Users\\luisr\\.m2\\repository\\org\\lwjgl\\lwjgl-openal\\3.3.3\\lwjgl-openal-3.3.3.jar;C:\\Users\\luisr\\.m2\\repository\\org\\lwjgl\\lwjgl-opengl\\3.3.3\\lwjgl-opengl-3.3.3.jar;C:\\Users\\luisr\\.m2\\repository\\org\\lwjgl\\lwjgl-stb\\3.3.3\\lwjgl-stb-3.3.3.jar;C:\\Users\\luisr\\.m2\\repository\\org\\lwjgl\\lwjgl\\3.3.3\\lwjgl-3.3.3-natives-windows.jar;C:\\Users\\luisr\\.m2\\repository\\org\\lwjgl\\lwjgl-glfw\\3.3.3\\lwjgl-glfw-3.3.3-natives-windows.jar;C:\\Users\\luisr\\.m2\\repository\\org\\lwjgl\\lwjgl-nfd\\3.3.3\\lwjgl-nfd-3.3.3-natives-windows.jar;C:\\Users\\luisr\\.m2\\repository\\org\\lwjgl\\lwjgl-openal\\3.3.3\\lwjgl-openal-3.3.3-natives-windows.jar;C:\\Users\\luisr\\.m2\\repository\\org\\lwjgl\\lwjgl-opengl\\3.3.3\\lwjgl-opengl-3.3.3-natives-windows.jar;C:\\Users\\luisr\\.m2\\repository\\org\\lwjgl\\lwjgl-stb\\3.3.3\\lwjgl-stb-3.3.3-natives-windows.jar;C:\\Users\\luisr\\.m2\\repository\\com\\google\\code\\gson\\gson\\2.8.9\\gson-2.8.9.jar\"";
+		command[5] = getClassPath();
 		command[6] = "-XX:+ShowCodeDetailsInExceptionMessages";
 		command[7] = "Launcher";
 		command[8] = sceneRelativePath;

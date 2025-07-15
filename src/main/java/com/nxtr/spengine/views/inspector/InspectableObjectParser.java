@@ -12,34 +12,38 @@ import java.util.stream.Collectors;
 import com.ngeneration.furthergui.FButton;
 import com.ngeneration.furthergui.FComboBox;
 import com.ngeneration.furthergui.FComponent;
+import com.ngeneration.furthergui.FLabel;
 import com.ngeneration.furthergui.event.ChangeListener;
 import com.ngeneration.miengine.scene.Component;
 import com.ngeneration.miengine.scene.annotations.Select;
 import com.ngeneration.miengine.scene.annotations.Tool;
 import com.ngeneration.miengine.util.EngineSerializer;
 import com.nxtr.easymng.Application;
-import com.nxtr.spengine.views.inspector.handlers.BasicInputComponentProvider;
+import com.nxtr.spengine.views.inspector.handlers.AbstractHandler;
+import com.nxtr.spengine.views.inspector.handlers.BasicDataTypeProvider;
 import com.nxtr.spengine.views.inspector.handlers.ListHandlerProvider;
-import com.nxtr.spengine.views.inspector.handlers.PropertyHandler;
-import com.nxtr.spengine.views.inspector.handlers.PropertyHandlerProvider;
+import com.nxtr.spengine.views.inspector.handlers.Handler;
+import com.nxtr.spengine.views.inspector.handlers.HandlerProvider;
 import com.nxtr.spengine.views.inspector.handlers.ReferenceHandler;
+import com.nxtr.spengine.views.inspector.resolver.ObjectsHandlerProvider;
 import com.nxtr.spengine.views.scene.Scene2DEditor;
 
 public class InspectableObjectParser {
 
-	private static List<PropertyHandlerProvider> propertyHandlerProviders = new LinkedList<PropertyHandlerProvider>();
+	private static List<HandlerProvider> propertyHandlerProviders = new LinkedList<HandlerProvider>();
 
 	static {
-		propertyHandlerProviders.add(new BasicInputComponentProvider());
+		propertyHandlerProviders.add(new BasicDataTypeProvider());
 //		propertyHandlerProviders.add(new ResourceHandler());
 		propertyHandlerProviders.add(new ReferenceHandler());
 
 		propertyHandlerProviders.add(new ListHandlerProvider());
+		
+		propertyHandlerProviders.add(new ObjectsHandlerProvider());
 	}
 
-	public static LinkedHashMap<FieldDescriptor, PropertyHandler> parse(Component component,
-			List<FieldDescriptor> fields) {
-		var map = new LinkedHashMap<FieldDescriptor, PropertyHandler>();
+	public static LinkedHashMap<FieldDescriptor, Handler> parse(Component component, List<FieldDescriptor> fields) {
+		var map = new LinkedHashMap<FieldDescriptor, Handler>();
 		fields.forEach(field -> {
 			var parsed = parse(component, field);
 			if (parsed != null)
@@ -54,7 +58,7 @@ public class InspectableObjectParser {
 		return map;
 	}
 
-	public static PropertyHandlerProvider parse(Component component, FieldDescriptor field) {
+	public static HandlerProvider parse(Component component, FieldDescriptor field) {
 		var annotations = List.of(field.getAnnotations() == null ? new Annotation[0] : field.getAnnotations()).stream()
 				.collect(Collectors.toMap(a -> a.annotationType(), a -> a));
 
@@ -67,9 +71,9 @@ public class InspectableObjectParser {
 			annotation = annotations1.get(Tool.class);
 
 		if (component != null && annotation instanceof Tool tool) {
-			PropertyHandlerProvider handler = new PropertyHandlerProvider() {
+			HandlerProvider handler = new HandlerProvider() {
 				@Override
-				public PropertyHandler getHandler(Class<?> type,
+				public Handler getHandler(Class<?> type,
 						Map<? extends Class<? extends Annotation>, Annotation> annotations, Object initialValue) {
 					var toolLabel = tool.label();
 					var toolClass = tool.tool();
@@ -90,7 +94,7 @@ public class InspectableObjectParser {
 							}
 						}
 					});
-					return new PropertyHandler() {
+					return new Handler() {
 
 						@Override
 						public void setValue(Object value) {
@@ -134,13 +138,47 @@ public class InspectableObjectParser {
 			List.of(select.value()).forEach(option -> combo.addItem(option));
 			// change selected value
 		} else if (propertyHandlerProviders.stream().filter(h -> h.canHandeType(field.getType(), annotations)).findAny()
-				.orElse(null) instanceof PropertyHandlerProvider handler) {
+				.orElse(null) instanceof HandlerProvider handler) {
 			return handler;
 		}
-		return null;
+
+		// default handler -- show as label!!!
+		return new HandlerProvider() {
+
+			@Override
+			public Handler getHandler(Class<?> type, Map<? extends Class<? extends Annotation>, Annotation> annotations,
+					Object initialValue) {
+				return new AbstractHandler() {
+
+					FLabel label = new FLabel(String.valueOf(initialValue));
+
+					@Override
+					public void setValue(Object value) {
+						super.setValue(value);
+						label.setText(String.valueOf(value));
+					}
+
+					@Override
+					public FComponent getComponent() {
+						return label;
+					}
+				};
+			}
+
+			@Override
+			public boolean canHandleFinal() {
+				return false;
+			}
+
+			@Override
+			public boolean canHandeType(Class<?> type,
+					Map<? extends Class<? extends Annotation>, Annotation> annotations) {
+				return true;
+			}
+		};
 	}
 
-	public static LinkedHashMap<FieldDescriptor, PropertyHandler> parseObject(Object component) {
+	public static LinkedHashMap<FieldDescriptor, Handler> parseObject(Object component) {
 		return parse(component instanceof Component ? (Component) component : null, getDescritors(component));
 	}
 

@@ -21,11 +21,15 @@ public class ComponentWraper {
 		return path[path.length - 1];
 	}
 
-	public Component newInstance() {
+	public Component newComponent() {
+		return (Component) newInstance();
+	}
+
+	public Object newInstance() {
 		try {
 			if (cl == null)
-				return (Component) Class.forName(qualifiedName).newInstance();
-			return (Component) cl.loadClass(getQualifiedName()).newInstance();
+				return Class.forName(qualifiedName).newInstance();
+			return cl.loadClass(getQualifiedName()).newInstance();
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}

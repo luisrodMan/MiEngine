@@ -12,6 +12,10 @@
             "text": "New Scene",
             "action": "newScene"
         },
+		{
+            "text": "New Camera",
+            "action": "newCamera"
+        },
         {
             "text": "Duplicate",
             "action": "duplicate"
@@ -24,18 +28,6 @@
             "text": "Delete",
             "action": "delete"
         },
-        {
-            "text": "New Panel",
-            "action": "newPanel"
-        },
-        {
-            "text": "New Text",
-            "action": "newText"
-        },
-        {
-            "text": "New Button",
-            "action": "newButton"
-        },
 		{
             "text": "Block",
             "action": "blockObject"
@@ -43,7 +35,23 @@
         {
             "text": "Set As Selection Root",
             "action": "setAsSelectionRoot"
+        },
+		{
+			"text": "UI",
+			"items": [
+				{
+					"text": "New Text",
+					"action": "newText"
+				},
+				{
+					"text": "New Button",
+					"action": "newButton"
+				},
+				{
+					"text": "New Panel",
+					"action": "newPanel"
+				}
+			]
         }
-        
     ]
 }

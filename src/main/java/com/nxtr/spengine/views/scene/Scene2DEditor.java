@@ -31,6 +31,7 @@ public class Scene2DEditor extends EditorAdapter implements MarkupEditor {
 
 	private GameObjectItem sceneHolder;
 	private Canvas2D canvas = new Canvas2D(this);
+	private DefaultDropHandler dropHandler = new DefaultDropHandler();
 	private PropertyChangeListener propertyChangeListener = event -> {
 		if (event.getSource() != this && getComponent().isVisible()) {
 
@@ -51,7 +52,6 @@ public class Scene2DEditor extends EditorAdapter implements MarkupEditor {
 		}
 	};
 
-	private DefaultDropHandler dropHandler = new DefaultDropHandler();
 
 	public Scene2DEditor() {
 		setScene(new GameObjectItem(null, new GameObject()));

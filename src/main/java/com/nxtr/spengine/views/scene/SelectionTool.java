@@ -7,11 +7,16 @@ import com.ngeneration.furthergui.graphics.Graphics;
 import com.ngeneration.miengine.math.Rectangle;
 import com.ngeneration.miengine.math.Vector2;
 import com.ngeneration.miengine.math.Vector3;
+import com.ngeneration.miengine.particles.BoxEmitter;
+import com.ngeneration.miengine.particles.CircleEmitter;
+import com.ngeneration.miengine.particles.EmitterShape2D;
 import com.ngeneration.miengine.scene.Renderer;
 import com.ngeneration.miengine.scene.physics.BoxCollider;
 import com.ngeneration.miengine.scene.physics.CircleCollider;
 import com.ngeneration.miengine.scene.physics.Collider;
 import com.ngeneration.miengine.scene.ui.CanvasComponent;
+import com.nxtr.easymng.hearachy.Item;
+import com.nxtr.easymng.hearachy.SelectionListener;
 
 public class SelectionTool extends AbstractTool {
 
@@ -22,11 +27,42 @@ public class SelectionTool extends AbstractTool {
 	private float colliderHandlerSize = 8;
 	private Handler handler;
 
+	private List<Item> localSelection;
+	private ToolManager toolManager;
+	
+	private SelectionListener selectionListener = (e) -> {
+		var newSelection = toolManager.getSelectionManager().getSelection();
+		for (var v : newSelection) {
+			if (!localSelection.contains(v))
+				((GameObjectItem) v).getObject().setAsSelected(true);
+		}
+		for (var v : localSelection) {
+			if (!newSelection.contains(v))
+				((GameObjectItem) v).getObject().setAsSelected(false);
+		}
+		localSelection = newSelection;
+		toolManager.repaintCanvas();
+	};
+
+
+
 	private class Handler {
 		private GameObjectItem item;
 		private Collider collider;
 		private int index;
 		private Vector2 offset = new Vector2();
+	}
+	
+	@Override
+	public void onAttached(ToolManager toolManager) {
+		this.toolManager = toolManager;
+		toolManager.getSelectionManager().addSelectionListener(selectionListener);
+		localSelection = toolManager.getSelectionManager().getSelection();
+	}
+	
+	@Override
+	public void onDettached(ToolManager toolManager) {
+		toolManager.getSelectionManager().removeSelectionListener(selectionListener);
 	}
 
 	public void mouseDragged(ToolManager mng) {
@@ -240,6 +276,34 @@ public class SelectionTool extends AbstractTool {
 		return null;
 	}
 
+	private void drawRect(ToolManager mng, Graphics g, Rectangle rect, Vector2 loc, float rotation) {
+		var camera = mng.getCamera();
+		var vector1 = new Vector2();
+		var vector2 = new Vector2();
+		if (rotation != 0) {
+
+			vector1 = mng.getGui(camera.getLocal(vector1.set(rect.x, rect.y).rotate(rotation).add(loc)));
+			vector2 = mng.getGui(camera.getLocal(vector2.set(rect.x + rect.width, rect.y).rotate(rotation).add(loc)));
+			g.drawLine(vector1.x, vector1.y, vector2.x, vector2.y);
+
+			vector1 = mng.getGui(
+					camera.getLocal(vector1.set(rect.x + rect.width, rect.y + rect.height).rotate(rotation).add(loc)));
+			g.drawLine(vector2.x, vector2.y, vector1.x, vector1.y);
+
+			vector2 = mng.getGui(camera.getLocal(vector2.set(rect.x, rect.y + rect.height).rotate(rotation).add(loc)));
+			g.drawLine(vector1.x, vector1.y, vector2.x, vector2.y);
+
+			vector1 = mng.getGui(camera.getLocal(vector1.set(rect.x, rect.y).rotate(rotation).add(loc)));
+			g.drawLine(vector2.x, vector2.y, vector1.x, vector1.y);
+
+		} else {
+			loc = loc.cpy().add(rect.x, rect.y);
+			var xx = mng.getGui(camera.getLocal(loc));
+			g.drawRect((int) xx.x, (int) xx.y, (int) (rect.width * camera.scale.x),
+					(int) (-rect.height * camera.scale.y));
+		}
+	}
+
 	@Override
 	public void paint(ToolManager mng, Graphics g) {
 		var selection = mng.getSelectionManager().getSelection();
@@ -264,36 +328,12 @@ public class SelectionTool extends AbstractTool {
 
 				Vector3 loc = camera.getLocal(gameItem.getObject().transform.getLocation().add(rect1.x, rect1.y));
 				loc = mng.getGui(loc);
-				var loc2 = object.transform.getLocation2();
-
-				var vector1 = new Vector2();
-				var vector2 = new Vector2();
-				if (rotation != 0) {
-					vector1 = mng.getGui(camera.getLocal(vector1.set(rect1.x, rect1.y).rotate(rotation).add(loc2)));
-					vector2 = mng.getGui(
-							camera.getLocal(vector2.set(rect1.x + rect1.width, rect1.y).rotate(rotation).add(loc2)));
-					g.drawLine(vector1.x, vector1.y, vector2.x, vector2.y);
-
-					vector1 = mng.getGui(camera.getLocal(
-							vector1.set(rect1.x + rect1.width, rect1.y + rect1.height).rotate(rotation).add(loc2)));
-					g.drawLine(vector2.x, vector2.y, vector1.x, vector1.y);
-
-					vector2 = mng.getGui(
-							camera.getLocal(vector2.set(rect1.x, rect1.y + rect1.height).rotate(rotation).add(loc2)));
-					g.drawLine(vector1.x, vector1.y, vector2.x, vector2.y);
-
-					vector1 = mng.getGui(camera.getLocal(vector1.set(rect1.x, rect1.y).rotate(rotation).add(loc2)));
-					g.drawLine(vector2.x, vector2.y, vector1.x, vector1.y);
-
-				} else {
-					g.drawRect((int) loc.x, (int) loc.y, (int) (rect1.width * camera.scale.x),
-							(int) (-rect1.height * camera.scale.y));
-				}
-
+				drawRect(mng, g, rect, object.transform.getLocation2(), object.transform.getRotationZ());
 			}
 
-			// collider handlers
 			if (selection.size() == 1) {
+
+				// collider handlers
 				for (var collider : selected.getObject().getComponents(Collider.class)) {
 					// draw handlers
 					g.setColor(Color.CYAN);
@@ -324,8 +364,33 @@ public class SelectionTool extends AbstractTool {
 					}
 
 				}
+
+				// particle shapes
+				for (var component : selected.getObject().getComponents()) {
+					if (component.getClass().getCanonicalName().equals("game.ParticleSystem")) {
+						try {
+							EmitterShape2D emitter = (EmitterShape2D) component.getClass().getField("shape")
+									.get(component);
+							g.setColor(Color.MAGENTA);
+							if (emitter instanceof BoxEmitter box) {
+								var rect = new Rectangle(-box.width / 2 * scale.x, -box.height / 2 * scale.y,
+										box.width * scale.x, box.height * scale.y);
+								drawRect(mng, g, rect, object.transform.getLocation2(),
+										object.transform.getRotationZ());
+							} else if (emitter instanceof CircleEmitter shape) {
+								var p = mng.getGui(camera.getLocal(object.transform.getLocalLocation()));
+								g.drawCircle(p.x, p.y, shape.radius * object.transform.getScaleX() * camera.scale.x, 3);
+							}
+
+						} catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException
+								| SecurityException e) {
+							e.printStackTrace();
+						}
+					}
+				}
 			}
 
+			// draw axes
 			Vector3 loc = camera.getLocal(selected.getObject().transform.getLocation());
 			loc = mng.getGui(loc);
 			g.setPenSize(2);

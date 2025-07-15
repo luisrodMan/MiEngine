@@ -26,7 +26,7 @@ import com.ngeneration.miengine.scene.invoke.ObjectCallback;
 import com.nxtr.easymng.hearachy.ItemsFlavor;
 import com.nxtr.spengine.views.scene.GameObjectItem;
 
-public class ListHandlerProvider extends PropertyHandlerByType {
+public class ListHandlerProvider extends HandlerProviderByType {
 
 	public ListHandlerProvider() {
 		super(new Class<?>[] { Collection.class });
@@ -44,12 +44,12 @@ public class ListHandlerProvider extends PropertyHandlerByType {
 	}
 
 	@Override
-	public PropertyHandler getHandler(Class<?> type, Map<? extends Class<? extends Annotation>, Annotation> annotations,
+	public Handler getHandler(Class<?> type, Map<? extends Class<? extends Annotation>, Annotation> annotations,
 			Object initialValue) {
 		return new CallbackHandler(initialValue);
 	}
 
-	private class CallbackHandler implements PropertyHandler {
+	private class CallbackHandler implements Handler {
 
 		private Object value;
 		private InternalComponent component;
